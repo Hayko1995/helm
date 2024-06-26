@@ -1,14 +1,10 @@
-
-
-{{- include ".Values.scheduler" . | nindent 6 }}
-
 {{- if .Values.backup.enabled -}}
 apiVersion: k8up.io/v1
 kind: Schedule
 metadata:
   name: {{ .Values.backup.backupName | default (include "base.fullname" .) }}
 spec:
-{{- if (eq .Values.backup.spec.moveBackup.enabled true)  -}} 
+{{- if (eq .Values.moveBackup.enabled true)  -}} 
  s3:
      {{- include ".Values.backup.spec.moveBakup.spec.s3" . | nindent 6 }}
 {{- end }}
