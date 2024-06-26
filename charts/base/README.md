@@ -31,7 +31,7 @@ ingress:
           path: /*
 ...
 ```
-
+`
 
 ```bash
 $ helm dependency update

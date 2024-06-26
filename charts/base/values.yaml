@@ -50,7 +50,8 @@ podAnnotations: {}
 podSecurityContext: {}
 # fsGroup: 2000
 
-securityContext: {}
+securityContext:
+  {}
   # capabilities:
   #   drop:
   #   - ALL
@@ -91,7 +92,7 @@ ingress:
 
 secrets: []
 secretsDefaultEngine: "ExternalSecrets"
-# secrets: 
+# secrets:
 #   - external-secret-1
 #   - external-secret-2
 #   - external-secret-3
@@ -114,7 +115,8 @@ secretsDefaultEngine: "ExternalSecrets"
 
 extraContainer: {}
 
-resources: {}
+resources:
+  {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -143,7 +145,8 @@ config: {}
 
 containerPort: 80
 
-livenessProbe: {}
+livenessProbe:
+  {}
   # failureThreshold: 3
   # httpGet:
   #   path: /
@@ -154,7 +157,8 @@ livenessProbe: {}
   # successThreshold: 1
 # timeoutSeconds: 1
 
-readinessProbe: {}
+readinessProbe:
+  {}
   # httpGet:
   #   path: /
   #   port: http
@@ -164,12 +168,14 @@ readinessProbe: {}
 envFrom:
   secret:
 
-startupProbe: {}
+startupProbe:
+  {}
   # httpGet:
   #   path: /
 #   port: http
 
-storage: {}
+storage:
+  {}
   # persistentVolumeClaimName: pvc-docs
   # requestedSize: 1G
   # className: gp2
@@ -186,3 +192,62 @@ pdb:
   enabled: false
   minAvailable: 1
   pdbName:
+
+backup:
+  enabled: true
+  spec:
+    backend:
+      s3:
+        endpoint: http://minio:9000
+        bucket: backups
+        accessKeyIDSecretRef:
+          name: minio-credentials
+          key: username
+        secretAccessKeySecretRef:
+          name: minio-credentials
+          key: password
+      repoPasswordSecretRef:
+        name: backup-repo
+        key: password
+    scheduler:
+      enabled: false
+      schedule: "*/5 * * * *"
+      failedJobsHistoryLimit: 2
+      successfulJobsHistoryLimit: 2
+      # optional
+      #promURL: https://prometheus-io-instance:8443
+    check:
+      schedule: "0 1 * * 1"
+      # optional
+      #promURL: https://prometheus-io-instance:8443
+    prune:
+      schedule: "0 1 * * 0"
+      retention:
+        keepLast: 5
+        keepDaily: 14
+
+moveBackup:
+  enabled: false
+  spec:
+    s3:
+      endpoint: http://localhost:9000
+      bucket: restore
+      accessKeyIDSecretRef:
+        name: backup-credentials
+        key: username
+      secretAccessKeySecretRef:
+        name: backup-credentials
+        key: password
+    backend:
+      repoPasswordSecretRef:
+        name: backup-repo
+        key: password
+      s3:
+        endpoint: http://localhost:9000
+        bucket: k8up
+        accessKeyIDSecretRef:
+          name: backup-credentials
+          key: username
+        secretAccessKeySecretRef:
+          name: backup-credentials
+          key: password
